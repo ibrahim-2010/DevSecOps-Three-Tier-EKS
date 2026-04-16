@@ -1,0 +1,65 @@
+name: CI
+
+# Placeholder GitHub Actions workflow — this project uses Jenkins for its
+# primary CI/CD pipeline. This file exists as a starting point for adding
+# GitHub-native checks (linting, YAML validation, Terraform formatting, etc.)
+# alongside the main Jenkins pipeline.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    name: Validate Configs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate YAML files
+        run: |
+          echo "Validating Kubernetes manifests..."
+          for f in $(find Kubernetes-Manifests-file -name "*.yaml" -o -name "*.yml"); do
+            echo "Checking $f"
+            python3 -c "import yaml; yaml.safe_load(open('$f'))"
+          done
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+
+      - name: Terraform format check
+        working-directory: Jenkins-Server-TF
+        run: terraform fmt -check -recursive
+
+      - name: Terraform validate
+        working-directory: Jenkins-Server-TF
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+  lint-jenkinsfiles:
+    name: Lint Jenkinsfiles
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Basic Jenkinsfile syntax check
+        run: |
+          echo "Checking Jenkinsfiles exist and are readable..."
+          test -f Jenkins-Pipeline-Code/Jenkinsfile-Backend
+          test -f Jenkins-Pipeline-Code/Jenkinsfile-Frontend
+          echo "Jenkinsfiles present"
+
+  # Future additions:
+  # - tflint / checkov for Terraform security scanning
+  # - kubeval / kubeconform for Kubernetes manifest validation
+  # - trivy / tfsec for IaC scanning
+  # - super-linter for multi-language linting
