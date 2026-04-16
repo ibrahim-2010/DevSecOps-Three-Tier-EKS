@@ -6,7 +6,6 @@
 [![Jenkins](https://img.shields.io/badge/Jenkins-CI%2FCD-red)](https://www.jenkins.io/)
 [![ArgoCD](https://img.shields.io/badge/ArgoCD-GitOps-teal)](https://argo-cd.readthedocs.io/)
 
-
 A production-grade DevSecOps pipeline that deploys a three-tier application (React frontend + Node.js API + MongoDB) to Amazon EKS, fully automated from commit to cluster with integrated security scanning, GitOps delivery, and observability.
 
 ---
@@ -14,19 +13,21 @@ A production-grade DevSecOps pipeline that deploys a three-tier application (Rea
 ## Table of Contents
 
 1. [Architecture](#architecture)
-2. [Technology Stack](#technology-stack)
-3. [Project Workflow](#project-workflow)
-4. [Prerequisites](#prerequisites)
-5. [Step-by-Step Setup](#step-by-step-setup)
-6. [Pipeline Flow](#pipeline-flow)
-7. [Common Issues & Fixes](#common-issues--fixes)
-8. [Teardown](#teardown)
-9. [Cost Breakdown](#cost-breakdown)
-10. [License](#license)
+2. [Results](#results)
+3. [Technology Stack](#technology-stack)
+4. [Project Workflow](#project-workflow)
+5. [Prerequisites](#prerequisites)
+6. [Step-by-Step Setup](#step-by-step-setup)
+7. [Pipeline Flow](#pipeline-flow)
+8. [Common Issues & Fixes](#common-issues--fixes)
+9. [Teardown](#teardown)
+10. [Cost Breakdown](#cost-breakdown)
+11. [License](#license)
 
 ---
 
 ## Architecture
+
 
 ```
                    ┌──────────────────────────────────────────────┐
@@ -66,6 +67,44 @@ A production-grade DevSecOps pipeline that deploys a three-tier application (Rea
                                           │  - Grafana             │
                                           └────────────────────────┘
 ```
+
+---
+
+## Results
+
+This project was built, deployed, and validated end-to-end. Here's proof it works.
+
+### Jenkins CI/CD — Both Pipelines Green
+
+Backend pipeline (13 stages, all passing):
+
+![Jenkins Backend Pipeline](docs/screenshots/jenkins-backend-pipeline.png)
+
+Frontend pipeline (13 stages, all passing):
+
+![Jenkins Frontend Pipeline](docs/screenshots/jenkins-frontend-pipeline.png)
+
+### ArgoCD — All Applications Healthy & Synced
+
+Four ArgoCD applications (database, backend, frontend, ingress) deployed via GitOps:
+
+![ArgoCD Applications](docs/screenshots/argocd-apps-synced.png)
+
+### Live Application
+
+Three-tier todo app accessible via AWS Application Load Balancer:
+
+![Live Todo App](docs/screenshots/todo-app-live.png)
+
+### Monitoring — Grafana Dashboard
+
+Kubernetes cluster monitoring with Prometheus data source (3 nodes, 22 deployments):
+
+![Grafana Dashboard](docs/screenshots/grafana-dashboard.png)
+
+### Issues Solved
+
+16 real-world production issues were encountered and resolved during this build. Full documentation: [Issues Faced & Solutions](docs/Issues_Faced_And_Solutions.md)
 
 ---
 
@@ -699,4 +738,3 @@ Original project structure inspired by [techlearn-center/DevOps](https://github.
 ## License
 
 MIT — use freely, attribution appreciated.
-
