@@ -6,6 +6,8 @@
 [![Jenkins](https://img.shields.io/badge/Jenkins-CI%2FCD-red)](https://www.jenkins.io/)
 [![ArgoCD](https://img.shields.io/badge/ArgoCD-GitOps-teal)](https://argo-cd.readthedocs.io/)
 
+![Architecture](assets/Three-Tier.gif)
+
 A production-grade DevSecOps pipeline that deploys a three-tier application (React frontend + Node.js API + MongoDB) to Amazon EKS, fully automated from commit to cluster with integrated security scanning, GitOps delivery, and observability.
 
 ---
