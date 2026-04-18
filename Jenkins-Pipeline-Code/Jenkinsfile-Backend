@@ -103,7 +103,7 @@ pipeline {
 
         stage('Update Kubernetes Deployment') {
             environment {
-                GIT_REPO_NAME = "DevOps"
+                GIT_REPO_NAME = "DevSecOps-Three-Tier-EKS"
                 GIT_USER_NAME = "ibrahim-2010"
             }
             steps {
