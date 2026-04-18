@@ -23,9 +23,9 @@ pipeline {
 
         stage('Checkout from Git') {
             steps {
-                git branch: 'e2e-3-tier-DevSecOps',
+                git branch: 'main',
                     credentialsId: 'github-token',
-                    url: 'https://github.com/ibrahim-2010/DevOps.git'
+                    url: 'https://github.com/ibrahim-2010/DevSecOps-Three-Tier-EKS.git'
             }
         }
 
@@ -95,9 +95,9 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'e2e-3-tier-DevSecOps',
+                git branch: 'main',
                     credentialsId: 'github-token',
-                    url: 'https://github.com/ibrahim-2010/DevOps.git'
+                    url: 'https://github.com/ibrahim-2010/DevSecOps-Three-Tier-EKS.git'
             }
         }
 
@@ -123,7 +123,7 @@ pipeline {
 
                                 git add deployment.yaml
                                 git commit -m "Update deployment Image to version ${BUILD_NUMBER}"
-                                git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:e2e-3-tier-DevSecOps
+                                git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
                             '''
                         }
                     }
