@@ -127,7 +127,7 @@ Kubernetes cluster monitoring with Prometheus data source (3 nodes, 22 deploymen
 
 ## Project Workflow
 
-1. Developer pushes code to the `e2e-3-tier-DevSecOps` branch on GitHub.
+1. Developer pushes code to the `main` branch on GitHub.
 2. Jenkins pipeline triggers and runs:
    - Workspace cleanup
    - Git checkout
@@ -205,8 +205,8 @@ aws sts get-caller-identity  # verify
 **Clone the repository:**
 
 ```bash
-git clone https://github.com/<your-username>/DevOps.git --branch e2e-3-tier-DevSecOps
-cd DevOps/Jenkins-Server-TF
+git clone https://github.com/<your-username>/DevSecOps-Three-Tier-EKS.git
+cd DevSecOps-Three-Tier-EKS/Jenkins-Server-TF
 ```
 
 **Create backend resources:**
@@ -447,7 +447,7 @@ Restart Jenkins.
 **Replace hardcoded values with your own**:
 
 ```bash
-cd ~/DevOps
+cd ~/DevSecOps-Three-Tier-EKS
 
 # Replace author's account ID with yours
 sed -i 's|851272254651|<your-account-id>|g' \
@@ -463,7 +463,7 @@ sed -i 's|techlearn-center|<your-username>|g' \
 
 git add .
 git commit -m "Update configs with own account ID and username"
-git push origin e2e-3-tier-DevSecOps
+git push origin main
 ```
 
 ---
@@ -475,9 +475,9 @@ For **Backend** and **Frontend**, do the following in Jenkins:
 1. Dashboard → **New Item** → Name: `three-tier-backend` (or `three-tier-frontend`)
 2. Select **Pipeline** → OK
 3. Pipeline script from **SCM** → Git
-4. Repository URL: `https://github.com/<your-username>/DevOps.git`
+4. Repository URL: `https://github.com/<your-username>/DevSecOps-Three-Tier-EKS.git`
 5. Credentials: **GitHub**
-6. Branch: `*/e2e-3-tier-DevSecOps`
+6. Branch: `*/main`
 7. Script Path: `Jenkins-Pipeline-Code/Jenkinsfile-Backend` (or `-Frontend`)
 8. Save → **Build Now**
 
@@ -491,7 +491,7 @@ First build takes longer due to OWASP NVD download (~5 min with API key).
 
 ArgoCD UI → Settings → Repositories → **CONNECT REPO USING HTTPS**:
 - Type: `git`
-- URL: `https://github.com/<your-username>/DevOps.git`
+- URL: `https://github.com/<your-username>/DevSecOps-Three-Tier-EKS.git`
 - Username: your GitHub username
 - Password: your GitHub PAT
 
@@ -507,8 +507,8 @@ ArgoCD UI → Settings → Repositories → **CONNECT REPO USING HTTPS**:
 Common settings for all:
 - Project: `default`
 - Sync Policy: **Automatic** (check Prune Resources + Self Heal)
-- Repository URL: `https://github.com/<your-username>/DevOps.git`
-- Revision: `e2e-3-tier-DevSecOps`
+- Repository URL: `https://github.com/<your-username>/DevSecOps-Three-Tier-EKS.git`
+- Revision: `main`
 - Cluster URL: `https://kubernetes.default.svc`
 
 Wait for all four to become **Healthy & Synced**, then grab the ALB DNS:
@@ -523,9 +523,13 @@ Open the `ADDRESS` in your browser — the app is live.
 
 ---
 
-### Step 14: Install EBS CSI Driver
+### Step 14: Prepare Cluster for Monitoring
 
-Required for PersistentVolumeClaims (Prometheus, Grafana, any stateful workload):
+Before installing Prometheus and Grafana, you must complete three prerequisites. Skipping any of these will result in pods stuck in `Pending` state.
+
+**14a. Install the EBS CSI Driver**
+
+EKS 1.23+ does not include a storage driver by default. Without it, PersistentVolumeClaims cannot be fulfilled and stateful pods (Prometheus, Grafana) will never start.
 
 ```bash
 eksctl create iamserviceaccount \
@@ -544,7 +548,15 @@ eksctl create addon \
   --force --region us-east-1
 ```
 
-**Replace the stale `gp2` StorageClass:**
+Verify the driver is running:
+
+```bash
+kubectl get pods -n kube-system | grep ebs
+```
+
+**14b. Replace the Default StorageClass**
+
+The default `gp2` StorageClass uses the deprecated `kubernetes.io/aws-ebs` provisioner. Replace it with the CSI-backed version:
 
 ```bash
 kubectl delete storageclass gp2
@@ -564,9 +576,43 @@ parameters:
 EOF
 ```
 
+Verify:
+
+```bash
+kubectl get storageclass
+# Should show gp2 with provisioner ebs.csi.aws.com and (default)
+```
+
+**14c. Scale the Nodegroup to 3 Nodes**
+
+Each `t3.small` node supports a maximum of 11 pods (AWS ENI limit). With the three-tier app, ArgoCD, ALB Controller, and EBS CSI driver already running, both nodes are at capacity. Prometheus and Grafana need a third node.
+
+```bash
+# Get your nodegroup name
+eksctl get nodegroup --cluster=Three-Tier-K8s-EKS-Cluster --region=us-east-1
+
+# Scale to 3 (replace <nodegroup-name> with actual name from above)
+eksctl scale nodegroup \
+  --cluster=Three-Tier-K8s-EKS-Cluster \
+  --nodes=3 --nodes-max=3 \
+  --name=<nodegroup-name> \
+  --region=us-east-1
+```
+
+Wait 2-3 minutes for the node to join:
+
+```bash
+kubectl get nodes
+# Should show 3 nodes in Ready state
+```
+
+> **Tip**: If using `t3.medium` (17 pods/node) or `t3.large` (35 pods/node), you may not need to scale. Check current usage with `kubectl describe nodes | grep -E "Name:|Non-terminated"`.
+
 ---
 
 ### Step 15: Set Up Prometheus & Grafana
+
+Only proceed after completing all three parts of Step 14. If pods get stuck in `Pending`, check: (1) EBS CSI driver running, (2) StorageClass uses `ebs.csi.aws.com`, (3) nodes have capacity.
 
 ```bash
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -575,19 +621,33 @@ helm repo update
 
 helm install prometheus prometheus-community/prometheus
 helm install grafana grafana/grafana
+```
 
-# Expose via LoadBalancer
+Wait 2 minutes for pods to start:
+
+```bash
+kubectl get pods | grep -E "grafana|prometheus"
+# Grafana and prometheus-server should be Running
+```
+
+Expose via LoadBalancer:
+
+```bash
 kubectl patch svc grafana -p '{"spec": {"type": "LoadBalancer"}}'
 kubectl patch svc prometheus-server -p '{"spec": {"type": "LoadBalancer"}}'
+```
 
-# Get Grafana admin password
+Get Grafana credentials and URLs:
+
+```bash
+# Admin password
 kubectl get secret grafana -o jsonpath="{.data.admin-password}" | base64 --decode; echo
 
-# Get URLs
+# LoadBalancer URLs (wait 2-3 min for EXTERNAL-IP to populate)
 kubectl get svc grafana prometheus-server
 ```
 
-**In Grafana**:
+**In Grafana** (login with admin + password from above):
 1. Connections → Data sources → Add Prometheus
    - URL: `http://prometheus-server.default.svc.cluster.local`
    - Save & test
@@ -671,7 +731,7 @@ aws iam delete-policy \
   --policy-arn arn:aws:iam::<account-id>:policy/AWSLoadBalancerControllerIAMPolicy
 
 # 7. On local machine: destroy Jenkins EC2
-cd ~/DevOps/Jenkins-Server-TF
+cd ~/DevSecOps-Three-Tier-EKS/Jenkins-Server-TF
 terraform destroy -var-file=variables.tfvars --auto-approve
 
 # 8. Clean Terraform backend (optional)
