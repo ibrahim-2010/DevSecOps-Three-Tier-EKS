@@ -24,7 +24,6 @@ Built by **Ibrahim Jinadu** — DevOps & Cloud Infrastructure Engineer with 7+ y
 🐙 **GitHub:** [github.com/ibrahim-2010](https://github.com/ibrahim-2010)  
 📁 **Also see:** [AWS Cost Optimization & FinOps project](https://github.com/ibrahim-2010/aws-cost-optimization)
  
-Open to **DevOps Engineer, SRE, Cloud Engineer, and Platform Engineer** roles. Feel free to connect on LinkedIn.
 ---
 
 ## Table of Contents
