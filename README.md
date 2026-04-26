@@ -1,13 +1,30 @@
 # Advanced End-to-End DevSecOps Kubernetes Three-Tier Project
-
+ 
 [![AWS](https://img.shields.io/badge/AWS-EKS-orange)](https://aws.amazon.com/eks/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.34-blue)](https://kubernetes.io/)
 [![Terraform](https://img.shields.io/badge/Terraform-IaC-purple)](https://www.terraform.io/)
 [![Jenkins](https://img.shields.io/badge/Jenkins-CI%2FCD-red)](https://www.jenkins.io/)
 [![ArgoCD](https://img.shields.io/badge/ArgoCD-GitOps-teal)](https://argo-cd.readthedocs.io/)
-
-A production-grade DevSecOps pipeline that deploys a three-tier application (React frontend + Node.js API + MongoDB) to Amazon EKS, fully automated from commit to cluster with integrated security scanning, GitOps delivery, and observability.
-
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/ibrahim-2010/DevSecOps-Three-Tier-EKS?style=social)](https://github.com/ibrahim-2010/DevSecOps-Three-Tier-EKS)
+ 
+A production-grade, end-to-end DevSecOps pipeline deploying a three-tier application (React + Node.js + MongoDB) to Amazon EKS — fully automated from commit to cluster with integrated security scanning, GitOps delivery, and observability.
+ 
+Built and validated in 2026 with current tooling: Jenkins 2026 GPG key, Java 21, EBS CSI driver for EKS 1.34, and CVSS v4 workarounds. Includes a complete log of **16 real production issues** encountered and resolved during the build — making this a practical reference for engineers implementing the same stack, not just a demo.
+ 
+> ⭐ If this project helped you, consider starring the repo — it helps other engineers find it.
+ 
+---
+ 
+## About the Author
+ 
+Built by **Ibrahim Jinadu** — DevOps & Cloud Infrastructure Engineer with 7+ years of experience specialising in AWS EKS, Kubernetes, Terraform, CI/CD automation, and GitOps delivery.
+ 
+🔗 **LinkedIn:** [linkedin.com/in/ibrahim-jinadu-2388b73b8](https://www.linkedin.com/in/ibrahim-jinadu-2388b73b8/)  
+🐙 **GitHub:** [github.com/ibrahim-2010](https://github.com/ibrahim-2010)  
+📁 **Also see:** [AWS Cost Optimization & FinOps project](https://github.com/ibrahim-2010/aws-cost-optimization)
+ 
+Open to **DevOps Engineer, SRE, Cloud Engineer, and Platform Engineer** roles — remote or hybrid. Feel free to connect on LinkedIn.
 ---
 
 ## Table of Contents
